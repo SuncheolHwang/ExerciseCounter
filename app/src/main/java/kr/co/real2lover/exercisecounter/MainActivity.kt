@@ -12,7 +12,7 @@ import kotlinx.coroutines.*
 import kr.co.real2lover.exercisecounter.databinding.ActivityMainBinding
 import kotlin.coroutines.CoroutineContext
 
-
+///
 class MainActivity : AppCompatActivity(), CoroutineScope {
     val TAG = "MainActivity"
 
