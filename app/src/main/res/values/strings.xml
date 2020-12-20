@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">ExerciseCounter</string>
+    <string name="counter_edit">Please Enter the value</string>
+    <string name="value">Input the value here.</string>
+    <string name="Input">Input</string>
+    <string name="Cancel">Cancel</string>
 </resources>
