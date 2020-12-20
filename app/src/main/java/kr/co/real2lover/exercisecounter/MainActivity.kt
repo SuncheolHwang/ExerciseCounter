@@ -1,5 +1,6 @@
 package kr.co.real2lover.exercisecounter
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
 import android.os.VibrationEffect
@@ -39,6 +40,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         private const val STOP_WATCH_START = 0
         private const val STOP_WATCH_PAUSE = 1
         private const val STOP_WATCH_CONTINUE = 2
+        private const val SHOW_PREFERENCE = 101
     }
 
     /**
@@ -242,7 +244,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 job.cancel()
             }
             else -> {
-
+                SettingFragmentStart()
             }
         }
         return super.onOptionsItemSelected(item)
@@ -267,5 +269,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         counterDialog.window?.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT)
         counterDialog.show()
+    }
+
+    fun SettingFragmentStart() {
+        val intent = Intent(this, SettingActivity::class.java)
+        startActivityForResult(intent, SHOW_PREFERENCE)
     }
 }
