@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:key="Exercise Counter"
+        android:title="Exercise Counter" >
+
+        <EditTextPreference
+            android:key="alarm_time"
+            android:title="Alarm Time"
+            android:summary="Break Time 알람시간을 입력하세요."
+            android:defaultValue="00:30" />
+
+        <SwitchPreference
+            android:key="alarm_type" />
+
+    </PreferenceCategory>
+</PreferenceScreen>
