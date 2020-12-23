@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <EditTextPreference
+    <Preference
+        android:defaultValue="false"
         android:key="alarm_time"
-        android:title="Alarm Time"
         android:summary="Break Time 알람시간을 입력하세요."
-        android:defaultValue="00:30" />
+        android:title="Alarm Time" />
 
     <SwitchPreference
         android:key="alarm_type"

@@ -1,6 +1,9 @@
 package kr.co.real2lover.exercisecounter
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.SystemClock
 import android.os.VibrationEffect
@@ -12,6 +15,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import kotlinx.coroutines.*
@@ -23,6 +27,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     val TAG = "MainActivity"
 
     private lateinit var binding: ActivityMainBinding
+    var pref: SharedPreferences? = null
 
     /**
      * Stop Watch 시간 저장 변수
@@ -62,7 +67,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     var vibrator: Vibrator? = null
     private val timings = longArrayOf(1000, 1000, 1000, 1000)
     private val amplitudes = intArrayOf(100, 0, 100, 0)
-    var alarmTime = "01:00"
+    var alarmTime = "00:30"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,6 +76,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         setContentView(view)
 
         vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
+
+        pref = application?.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
 
         params = binding.layoutWatchButton.layoutParams as LinearLayout.LayoutParams
 
@@ -142,6 +149,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
 
         job = Job()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        alarmTime = pref?.getString(getString(R.string.setting_alarm_time), "00:30").toString()
+        Toast.makeText(this, alarmTime, Toast.LENGTH_SHORT).show()
     }
 
     fun stopWatch() {
@@ -259,6 +272,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val counterDialog = CounterEditDialog(this, object : CustomDialogClickListener{
             override fun onPositiveClick(value: String) {
                 binding.textCounter.text = value
+                counter = value.toInt()
                 breakTimeCounter(0)
             }
 
@@ -274,5 +288,19 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     fun SettingFragmentStart() {
         val intent = Intent(this, SettingActivity::class.java)
         startActivityForResult(intent, SHOW_PREFERENCE)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (resultCode) {
+            Activity.RESULT_OK -> {
+                if (requestCode == SHOW_PREFERENCE) {
+                    Log.d(TAG, "onActivityResult() 호출")
+
+                    val alarmTime = pref?.getString("alarm_time", "00:30")
+                    Toast.makeText(this, alarmTime, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 }
