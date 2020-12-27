@@ -9,7 +9,7 @@
     <com.prolificinteractive.materialcalendarview.MaterialCalendarView
         android:id="@+id/calendar_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -19,8 +19,9 @@
         app:mcv_headerTextAppearance="@style/TextAppearance.AppCompat.Large"
         app:mcv_selectionColor="@color/design_default_color_secondary"
         app:mcv_selectionMode="single"
-        app:mcv_showOtherDates="all"
+        app:mcv_showOtherDates="other_months"
         app:mcv_showWeekDays="true"
+        app:mcv_tileSize="56dp"
         app:mcv_titleAnimationOrientation="horizontal"
         app:mcv_weekDayTextAppearance="@style/TextAppearance.AppCompat.Body2" />
 
