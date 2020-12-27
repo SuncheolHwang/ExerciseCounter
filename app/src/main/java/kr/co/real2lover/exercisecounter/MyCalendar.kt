@@ -30,7 +30,8 @@ class MyCalendar : AppCompatActivity() {
         calendarView.addDecorators(
                 SaturdayDecorator(),
                 SundayDecorator(),
-                MinMaxDecorator()
+                MinMaxDecorator(),
+                TodayDecorator(this)
         )
 
         calendarView.selectedDate = CalendarDay.today()
@@ -39,12 +40,6 @@ class MyCalendar : AppCompatActivity() {
             date.copyTo(mCalendar)
             widget.addDecorator(MinMaxDecorator())
         }
-
-/*        calendarView.setOnDateChangedListener { widget, date, selected ->
-            if (selected) {
-                widget.addDecorator(MySelectorDecorator(this, date))
-            }
-        }*/
 
         val exerciseTime = intent.getLongExtra("ExerciseTime", 0)
         binding.textDay.text = getString(R.string.exercise_time) + " -> " + convertLongToTime(exerciseTime)
@@ -101,16 +96,16 @@ class MyCalendar : AppCompatActivity() {
         }
     }
 
-    inner class MySelectorDecorator(context: Activity, selectedDay: CalendarDay) : DayViewDecorator {
+    inner class TodayDecorator(context: Activity) : DayViewDecorator {
         private val drawable: Drawable = context.resources.getDrawable(R.drawable.my_selector, null)
-        private val selectedDay = selectedDay.day
+        private val today = CalendarDay.today()
 
         override fun shouldDecorate(day: CalendarDay?): Boolean {
-            return day?.day == selectedDay
+            return day == today
         }
 
         override fun decorate(view: DayViewFacade?) {
-            view?.setSelectionDrawable(drawable)
+            view?.setBackgroundDrawable(drawable)
         }
     }
 }
