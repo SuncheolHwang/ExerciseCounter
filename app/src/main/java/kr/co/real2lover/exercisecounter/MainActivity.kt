@@ -14,10 +14,8 @@ import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
 import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import kotlinx.coroutines.*
 import kr.co.real2lover.exercisecounter.databinding.ActivityMainBinding
 import kotlin.coroutines.CoroutineContext
@@ -34,6 +32,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
      * Stop Watch 상태 변수
      */
     private var timeWhenStopped: Long = 0
+    private var breakTimeWhenStopped: Long = 0
     private var timerStatus = STOP_WATCH_START
     private var breakTimerStatus = STOP_WATCH_PAUSE
     private lateinit var params: LinearLayout.LayoutParams
@@ -46,6 +45,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         private const val STOP_WATCH_PAUSE = 1
         private const val STOP_WATCH_CONTINUE = 2
         private const val SHOW_PREFERENCE = 101
+        private const val SHOW_MY_CALENDAR = 102
     }
 
     /**
@@ -64,10 +64,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     /**
      * for Vibrator
      */
+    var alarmTime = "00:30"
     var vibrator: Vibrator? = null
     private val timings = longArrayOf(1000, 1000, 1000, 1000)
     private val amplitudes = intArrayOf(100, 0, 100, 0)
-    var alarmTime = "00:30"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,6 +108,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }
 
             buttonPlus.setOnClickListener {
+                breakTimeBtnReset()
                 layoutBreakTime.visibility = View.GONE
                 counter++
                 textCounter.text = counter.toString()
@@ -117,6 +118,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }
 
             buttonMinus.setOnClickListener {
+                breakTimeBtnReset()
                 layoutBreakTime.visibility = View.GONE
                 counter--
                 textCounter.text = counter.toString()
@@ -163,13 +165,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 STOP_WATCH_START -> {
                     textTimer.base = SystemClock.elapsedRealtime()
                     textTimer.start()
-                    timerStatus = 1
+                    timerStatus = STOP_WATCH_PAUSE
                     buttonTimer.text = "PAUSE"
                 }
                 STOP_WATCH_PAUSE -> {
                     timeWhenStopped = textTimer.base - SystemClock.elapsedRealtime()
                     textTimer.stop()
-                    timerStatus = 2
+                    timerStatus = STOP_WATCH_CONTINUE
                     params.weight = 3F
                     buttonTimer.text = "CONTINUE"
                     buttonReset.visibility = View.VISIBLE
@@ -177,7 +179,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 STOP_WATCH_CONTINUE -> {
                     textTimer.base = SystemClock.elapsedRealtime() + timeWhenStopped
                     textTimer.start()
-                    timerStatus = 1
+                    timerStatus = STOP_WATCH_PAUSE
                     params.weight = 2F
                     buttonTimer.text = "PAUSE"
                     buttonReset.visibility = View.GONE
@@ -223,20 +225,26 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         binding.apply {
             when (breakTimerStatus) {
                 STOP_WATCH_PAUSE -> {
-                    timeWhenStopped = textBreakTime.base - SystemClock.elapsedRealtime()
+                    breakTimeWhenStopped = textBreakTime.base - SystemClock.elapsedRealtime()
                     textBreakTime.stop()
                     breakTimerStatus = STOP_WATCH_CONTINUE
                     buttonBtStop.text = "CONTINUE"
                     vibrator?.cancel()
                 }
                 STOP_WATCH_CONTINUE -> {
-                    textBreakTime.base = SystemClock.elapsedRealtime() + timeWhenStopped
+                    textBreakTime.base = SystemClock.elapsedRealtime() + breakTimeWhenStopped
                     textBreakTime.start()
                     breakTimerStatus = STOP_WATCH_PAUSE
                     buttonBtStop.text = "PAUSE"
                 }
             }
         }
+    }
+
+    fun breakTimeBtnReset() {
+        breakTimerStatus = STOP_WATCH_PAUSE
+        binding.buttonBtStop.text = "PAUSE"
+        binding.textBreakTime.stop()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -247,8 +255,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.menuCalendar -> {
-
+                myCalendarStart()
             }
+
             R.id.menuReset -> {
                 vibrator?.cancel()
                 counter = 0
@@ -256,6 +265,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 binding.layoutBreakTime.visibility = View.GONE
                 job.cancel()
             }
+
             else -> {
                 SettingFragmentStart()
             }
@@ -269,8 +279,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     fun dialogOpen() {
-        val counterDialog = CounterEditDialog(this, object : CustomDialogClickListener{
+        val counterDialog = CounterEditDialog(this, object : CustomDialogClickListener {
             override fun onPositiveClick(value: String) {
+                breakTimeBtnReset()
                 binding.textCounter.text = value
                 counter = value.toInt()
                 breakTimeCounter(0)
@@ -302,5 +313,16 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 }
             }
         }
+    }
+
+    fun myCalendarStart() {
+        val intent = Intent(this, MyCalendar::class.java)
+        val exerciseTime = when {
+            (timerStatus == STOP_WATCH_START) -> 0
+            (timerStatus == STOP_WATCH_PAUSE) -> SystemClock.elapsedRealtime() - binding.textTimer.base
+            else -> -timeWhenStopped
+        }
+        intent.putExtra("ExerciseTime", exerciseTime)
+        startActivityForResult(intent, SHOW_MY_CALENDAR)
     }
 }

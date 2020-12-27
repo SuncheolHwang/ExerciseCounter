@@ -8,4 +8,6 @@
     <string name="setting_alarm_time">alarm_time</string>
     <string name="select_time">Set Time</string>
     <string name="time">Time</string>
+    <string name="start">START</string>
+    <string name="exercise_time">Exercise Time</string>
 </resources>

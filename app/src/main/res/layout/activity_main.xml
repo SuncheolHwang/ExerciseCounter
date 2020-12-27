@@ -15,7 +15,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
         android:paddingStart="10dp"
-        android:text="ExerciseTime"
+        android:text="@string/exercise_time"
         android:textColor="@color/black"
         android:textSize="24sp"
         app:autoSizeTextType="uniform"
@@ -63,7 +63,7 @@
                 android:autoSizeMinTextSize="6sp"
                 android:autoSizeTextType="uniform"
                 android:maxLines="1"
-                android:text="Start" />
+                android:text="@string/start" />
 
             <Button
                 android:id="@+id/buttonReset"
