@@ -7,12 +7,16 @@ import android.os.Bundle
 import android.text.style.ForegroundColorSpan
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.room.Room
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.DayViewDecorator
 import com.prolificinteractive.materialcalendarview.DayViewFacade
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
+import kr.co.real2lover.exercisecounter.data.RoomHelper
+import kr.co.real2lover.exercisecounter.data.RoomRecord
 import kr.co.real2lover.exercisecounter.databinding.MyCalendarBinding
 import java.util.*
+import kotlin.collections.HashMap
 
 class MyCalendar : AppCompatActivity() {
     private lateinit var binding: MyCalendarBinding
@@ -20,23 +24,38 @@ class MyCalendar : AppCompatActivity() {
 
     val mCalendar: Calendar = Calendar.getInstance()
 
+    /**
+     * for RoomDatabase
+     */
+    var helper: RoomHelper? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = MyCalendarBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+
+        helper = Room.databaseBuilder(this, RoomHelper::class.java, "room_record")
+            .allowMainThreadQueries()
+            .build()
+
+        val list = helper?.roomRecordDao()?.getAll()
+
+        var map = list?.let { listToMap(it) }
+
         calendarView = findViewById(R.id.calendar_view)
         calendarView.addDecorators(
                 SaturdayDecorator(),
                 SundayDecorator(),
                 MinMaxDecorator(),
-                TodayDecorator(this)
+                TodayDecorator(this),
+                EventDecorator(map)
         )
 
         calendarView.selectedDate = CalendarDay.today()
+
         calendarView.setOnMonthChangedListener { widget, date ->
-            Log.d("MainActivity", "setOnMonthChangedListener 호출")
             date.copyTo(mCalendar)
             widget.addDecorator(MinMaxDecorator())
         }
@@ -50,6 +69,19 @@ class MyCalendar : AppCompatActivity() {
         val m = (time - h * 3600000).toInt() / 60000
         val s = (time - h * 3600000 - m * 60000).toInt() / 1000
         return (if (h < 10) "0$h" else h).toString() + ":" + (if (m < 10) "0$m" else m) + ":" + if (s < 10) "0$s" else s
+    }
+
+    fun listToMap(list: List<RoomRecord>): Map<CalendarDay, String> {
+        val map = mutableMapOf<CalendarDay, String>()
+        for (record in list) {
+            val year = record.date?.substring(0..3)?.toInt()
+            val month = record.date?.substring(5..6)?.toInt()
+            val day = record.date?.substring(8..9)?.toInt()
+            val calendarDay = CalendarDay.from(year ?: 0, month ?: 0, day ?: 0)
+            map[calendarDay] = convertLongToTime(record.time)
+        }
+
+        return map
     }
 
     inner class SaturdayDecorator : DayViewDecorator {
@@ -106,6 +138,21 @@ class MyCalendar : AppCompatActivity() {
 
         override fun decorate(view: DayViewFacade?) {
             view?.setBackgroundDrawable(drawable)
+        }
+    }
+
+    inner class EventDecorator(dates: Map<CalendarDay, String>?) : DayViewDecorator {
+        private val dates: HashMap<CalendarDay, String>? = HashMap(dates)
+
+        override fun shouldDecorate(day: CalendarDay?): Boolean {
+            if (dates != null) {
+                return dates.containsKey(day)
+            }
+            return false
+        }
+
+        override fun decorate(view: DayViewFacade?) {
+            view?.addSpan(TextSpan(dates, mCalendar))
         }
     }
 }
