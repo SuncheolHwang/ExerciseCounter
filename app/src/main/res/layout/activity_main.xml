@@ -89,65 +89,89 @@
         app:layout_constraintTop_toBottomOf="@+id/linearLayout">
 
         <LinearLayout
+            android:id="@+id/counterLayout"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="10dp"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             app:layout_constraintBottom_toTopOf="@+id/buttonPlus"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/textCounter"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginTop="50dp"
-                android:layout_marginBottom="50dp"
-                android:layout_weight="7"
-                android:gravity="center"
-                android:text="0"
-                android:textSize="40sp"
-                app:autoSizeTextType="uniform" />
-
             <LinearLayout
-                android:id="@+id/layoutBreakTime"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginTop="50dp"
-                android:layout_marginBottom="50dp"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:visibility="gone">
+                android:id="@+id/counterLayout2"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="10dp"
+                android:layout_weight="8"
+                android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="10dp"
-                    android:text="Break Time"
-                    android:textSize="18sp" />
-
-                <Chronometer
-                    android:id="@+id/textBreakTime"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:id="@+id/textCounter"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="50dp"
+                    android:layout_marginBottom="40dp"
+                    android:layout_weight="7"
                     android:gravity="center"
-                    android:maxLines="1"
-                    android:padding="10dp"
-                    android:text="00:00"
-                    android:textSize="24sp"
-                    android:visibility="visible"
+                    android:text="0"
+                    android:textSize="40sp"
                     app:autoSizeTextType="uniform" />
 
-                <Button
-                    android:id="@+id/buttonBtStop"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginEnd="5dp"
-                    android:text="STOP"
-                    app:autoSizeTextType="uniform" />
+                <LinearLayout
+                    android:id="@+id/layoutBreakTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="50dp"
+                    android:layout_marginBottom="40dp"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:text="Break Time"
+                        android:textSize="18sp" />
+
+                    <Chronometer
+                        android:id="@+id/textBreakTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:padding="10dp"
+                        android:text="00:00"
+                        android:textSize="24sp"
+                        android:visibility="visible"
+                        app:autoSizeTextType="uniform" />
+
+                    <Button
+                        android:id="@+id/buttonBtStop"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="5dp"
+                        android:text="STOP"
+                        app:autoSizeTextType="uniform" />
+                </LinearLayout>
+
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/textExTime"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginBottom="20dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/time_to_exercise"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:visibility="gone"
+                app:autoSizeTextType="uniform" />
 
         </LinearLayout>
 

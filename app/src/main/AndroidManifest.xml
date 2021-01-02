@@ -3,6 +3,7 @@
     package="kr.co.real2lover.exercisecounter">
 
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:allowBackup="true"
@@ -11,9 +12,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ExerciseCounter">
-        <activity android:name=".MyCalendar"></activity>
-        <activity android:name=".SettingActivity"></activity>
-        <activity android:name=".MainActivity">
+        <service
+            android:name=".WatchForeground"
+            android:enabled="true"
+            android:exported="true"></service>
+
+        <activity android:name=".MyCalendar" />
+        <activity android:name=".SettingActivity" />
+        <activity android:name=".MainActivity"
+            android:launchMode="singleTop">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
