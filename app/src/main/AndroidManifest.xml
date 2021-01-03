@@ -12,16 +12,25 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ExerciseCounter">
+        <receiver
+            android:name=".MyWatchReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="kr.co.real2lover.action.watchcontrol" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name=".WatchForeground"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
         <activity android:name=".MyCalendar" />
         <activity android:name=".SettingActivity" />
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".MainActivity"
             android:launchMode="singleTop">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

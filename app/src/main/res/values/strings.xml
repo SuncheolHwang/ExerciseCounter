@@ -12,7 +12,11 @@
     <string name="exercise_time">Exercise Time</string>
     <string name="time_to_exercise">Time to exercise!!</string>
 
-    <string name="notification_title">Exercise Stop Watch</string>
+    <string name="notification_title">Exercise Stopwatch</string>
     <string name="notification_message">00:00:00</string>
     <string name="ticker_text">It is for Exercise Timer</string>
+
+    <string name="pause">PAUSE</string>
+    <string name="watch_continue">CONTINUE</string>
+    <string name="stop">STOP</string>
 </resources>

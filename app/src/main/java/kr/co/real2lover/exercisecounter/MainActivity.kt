@@ -28,7 +28,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     private lateinit var binding: ActivityMainBinding
 
-    var pref: SharedPreferences? = null
     var savedTime: Long = 0L
     var savedDate: String = ""
 
@@ -60,6 +59,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
          */
         const val EXERCISE_TIME_KEY = "EXERCISE_TIME_KEY"
         const val DATE_KEY = "DATE_KEY"
+        const val FOREGROUND_SERVICE_KEY = "forgroundServiceKey"
+
+        var pref: SharedPreferences? = null
     }
 
     /**
@@ -119,15 +121,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         //같은 날짜에서는 운동시간 저장
         savedDate = pref?.getString(DATE_KEY, "00:00:00").toString()
         val strDate = "${thisYear}:${thisMonth}:${today}"
-
-        savedTime = if (intent.flags != PENDING_INTENT_FALG) {
-            Log.d(TAG, "intent == null")
-            if (savedDate == strDate) pref?.getLong(EXERCISE_TIME_KEY, 0) ?: 0 else 0
-        } else {
-            Log.d(TAG, "intent != null")
-            intent.getLongExtra(EXERCISE_TIME_KEY, 0)
-        }
-
         savedTime = if (savedDate == strDate) pref?.getLong(EXERCISE_TIME_KEY, 0) ?: 0 else 0
 
         binding.apply {
@@ -195,6 +188,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             textCounter.setOnLongClickListener {
                 dialogOpen()
                 true
+            }
+
+            if (pref?.getString(FOREGROUND_SERVICE_KEY, "from MainActivity") == "from Service") {
+                stopWatch()
+                pref?.edit()?.putString(FOREGROUND_SERVICE_KEY, "from MainActivity")?.commit()
             }
         }
 
