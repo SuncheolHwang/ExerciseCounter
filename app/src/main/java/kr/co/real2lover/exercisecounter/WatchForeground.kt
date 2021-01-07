@@ -1,6 +1,7 @@
 package kr.co.real2lover.exercisecounter
 
 import android.app.*
+import android.content.Context
 import android.content.Intent
 import android.os.Binder
 import android.os.Build
@@ -27,6 +28,8 @@ class WatchForeground : Service(), CoroutineScope {
 
     companion object {
         const val ACTION_STATUS = "WatchForeground.ACTION_STATUS"
+        const val IS_TIMER_STOP = "WatchForeground.TIMER_STATUS"
+        const val FOREGROUND_TIMER = "WatchForeground.TIMER"
         const val ACTION_PAUSE = "PAUSE"
         const val ACTION_STOP = "STOP"
 
@@ -43,7 +46,6 @@ class WatchForeground : Service(), CoroutineScope {
                     "Foreground Service Channel",
                     NotificationManager.IMPORTANCE_DEFAULT
             )
-
             getSystemService(NotificationManager::class.java)
                     .createNotificationChannel(serviceChannel)
         }
@@ -51,72 +53,50 @@ class WatchForeground : Service(), CoroutineScope {
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        timerStop = false
+
         serviceJob = Job()
 
         createNotificationChannel()
 
+        //MainActivity 로 부터 timer 수신
         var timer = intent?.getLongExtra(MainActivity.EXERCISE_TIME_KEY, 0)
         var strTimer = timer?.let { watchTimer.convertLongToTime(it) }
 
-        val pendingIntent: PendingIntent = Intent(this, MainActivity::class.java).let { notificationIntent ->
-            PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        }
+        //Notification 알림 생성
+        val builder = createNotification(strTimer, false)
+        val pauseBuilder = createNotification(strTimer, true)
 
-        MainActivity.pref?.edit()?.apply {
-            putLong(MainActivity.EXERCISE_TIME_KEY, timer!!)?.commit()
-            putString(MainActivity.FOREGROUND_SERVICE_KEY, "from Service")?.commit()
-        }
-
-        val pauseIntent = Intent(this, MyWatchReceiver::class.java).apply {
-            putExtra(ACTION_STATUS, "PAUSE")
-        }
-        val pausePendingIntent = PendingIntent.getBroadcast(this, 0, pauseIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-
-        val stopIntent = Intent(this, MyWatchReceiver::class.java).apply {
-            putExtra(ACTION_STATUS, "STOP")
-        }
-        val stopPendingIntent = PendingIntent.getBroadcast(this, 0, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID).apply {
-            setContentTitle(getText(R.string.notification_title))
-            setContentText(strTimer)
-            setSmallIcon(R.drawable.ic_forground)
-            setContentIntent(pendingIntent)
-            setShowWhen(false)
-            setTicker(getText(R.string.ticker_text))
-            setAutoCancel(true)
-            addAction(R.drawable.ic_pause, getString(R.string.pause), pausePendingIntent)
-            addAction(R.drawable.ic_pause, getString(R.string.stop), stopPendingIntent)
-        }
-
+        //Foreground 시작
         startForeground(ONGOING_NOTIFICATION_ID, builder.build())
 
         NotificationManagerCompat.from(this).apply {
             notify(ONGOING_NOTIFICATION_ID, builder.build())
-
             launch {
-                while (!timerStop) {
+                while (true) {
                     if (!timerStop) {
-                        delay(1000)
-                        timer = timer?.plus(1000L)
                         Log.d(MainActivity.TAG, "timer: $timer")
                         strTimer = timer?.let { watchTimer.convertLongToTime(it) }
-                        MainActivity.pref?.edit()?.putLong(MainActivity.EXERCISE_TIME_KEY, timer!!)
-                            ?.commit()
                         builder.setContentText(strTimer)
                         notify(ONGOING_NOTIFICATION_ID, builder.build())
-                        Log.d(MainActivity.TAG, "timerStop: $timerStop")
+                        timer = timer?.plus(1000L)
                     } else {
-                        delay(1000)
-                        builder.addAction(R.drawable.ic_pause, getString(R.string.watch_continue), pausePendingIntent)
-                        notify(ONGOING_NOTIFICATION_ID, builder.build())
-                        Log.d(MainActivity.TAG, "timerStop: $timerStop")
+                        Log.d(MainActivity.TAG, "timer: $timer")
+                        pauseBuilder.setContentText(strTimer)
+                        notify(ONGOING_NOTIFICATION_ID, pauseBuilder.build())
                     }
+                    setContentIntent(this@WatchForeground, pauseBuilder, timer)
+
+                    //MainActivity 로 data 전달
+                    MainActivity.pref?.edit()?.apply {
+                        putBoolean(MainActivity.TIMER_STATUS_KEY, timerStop)
+                        putLong(MainActivity.EXERCISE_TIME_KEY, timer!!)?.commit()
+                        putString(MainActivity.FOREGROUND_SERVICE_KEY, "from Service")?.commit()
+                    }
+                    delay(1000)
                 }
             }
-            notify(ONGOING_NOTIFICATION_ID, builder.build())
         }
-
         return START_STICKY
     }
 
@@ -125,4 +105,45 @@ class WatchForeground : Service(), CoroutineScope {
         serviceJob.cancel()
         super.onDestroy()
     }
+
+    fun createNotification(timer: String?, isTimerStop: Boolean) : NotificationCompat.Builder {
+        val pendingIntent: PendingIntent = Intent(this, MainActivity::class.java).let { notificationIntent ->
+            notificationIntent.putExtra(IS_TIMER_STOP, timerStop)
+            PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+
+        val pausePendingIntent: PendingIntent = Intent(this, MyWatchReceiver::class.java).let { notificationIntent ->
+            notificationIntent.putExtra(ACTION_STATUS, "PAUSE")
+            PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+
+        val stopPendingIntent: PendingIntent = Intent(this, MyWatchStopReceiver::class.java).let { notificationIntent ->
+            notificationIntent.putExtra(ACTION_STATUS, "STOP")
+            PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+
+        return NotificationCompat.Builder(this, CHANNEL_ID).apply {
+            setContentTitle(getText(R.string.notification_title))
+            setContentText(timer)
+            setSmallIcon(R.drawable.ic_forground)
+            setContentIntent(pendingIntent)
+            setShowWhen(false)
+            setTicker(getText(R.string.ticker_text))
+            setAutoCancel(true)
+            addAction(R.drawable.ic_pause, if(isTimerStop) getString(R.string.watch_continue) else getString(R.string.pause),
+                    pausePendingIntent)
+            addAction(R.drawable.ic_pause, getString(R.string.stop), stopPendingIntent)
+        }
+    }
+
+    suspend fun setContentIntent(context: Context, builder: NotificationCompat.Builder, timer: Long?) =
+            withContext(Dispatchers.Main) {
+                val pendingIntent: PendingIntent = Intent(context, MainActivity::class.java).let { notificationIntent ->
+                    notificationIntent
+                            .putExtra(IS_TIMER_STOP, timerStop)
+                            .putExtra(FOREGROUND_TIMER, timer)
+                    PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                }
+                builder.setContentIntent(pendingIntent)
+            }
 }

@@ -60,6 +60,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         const val EXERCISE_TIME_KEY = "EXERCISE_TIME_KEY"
         const val DATE_KEY = "DATE_KEY"
         const val FOREGROUND_SERVICE_KEY = "forgroundServiceKey"
+        const val TIMER_STATUS_KEY = "TIMER_STATUS_KEY"
 
         var pref: SharedPreferences? = null
     }
@@ -190,10 +191,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 true
             }
 
-            if (pref?.getString(FOREGROUND_SERVICE_KEY, "from MainActivity") == "from Service") {
-                stopWatch()
-                pref?.edit()?.putString(FOREGROUND_SERVICE_KEY, "from MainActivity")?.commit()
-            }
+            checkTimerFromForeService()
         }
 
         job = Job()
@@ -201,8 +199,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     override fun onResume() {
         super.onResume()
+        Log.d(TAG, "onResume() 호출")
         alarmTime = pref?.getString(getString(R.string.setting_alarm_time), "00:30").toString()
-        Toast.makeText(this, alarmTime, Toast.LENGTH_SHORT).show()
 
         val serviceIntent = Intent(this, WatchForeground::class.java)
         stopService(serviceIntent)
@@ -219,6 +217,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 }
                 STOP_WATCH_PAUSE -> {
                     timeWhenStopped = textTimer.base - SystemClock.elapsedRealtime()
+                    textTimer.text = convertLongToTime(-timeWhenStopped)
                     textTimer.stop()
                     timerStatus = STOP_WATCH_CONTINUE
                     params.weight = 3F
@@ -399,6 +398,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         pref?.edit()?.run {
             putLong(EXERCISE_TIME_KEY, exerciseTime).commit()
             putString(DATE_KEY, strDate).commit()
+            putString(FOREGROUND_SERVICE_KEY, "from MainActivity")?.commit()
         }
 
         helper?.roomRecordDao()?.insertAll(RoomRecord(strDate, exerciseTime))
@@ -411,8 +411,40 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     override fun onNewIntent(intent: Intent?) {
-        Log.d(TAG, "onNewIntent() 호출")
-
         super.onNewIntent(intent)
+
+        val isTimerStop = intent?.getBooleanExtra(WatchForeground.IS_TIMER_STOP, false)
+
+        if (isTimerStop != null) {
+            timerStatus = if (isTimerStop) STOP_WATCH_PAUSE else STOP_WATCH_START
+
+            if (timerStatus == STOP_WATCH_START) {
+                savedTime = intent?.getLongExtra(WatchForeground.FOREGROUND_TIMER, 0)
+            } else if (timerStatus == STOP_WATCH_PAUSE) {
+                binding.textTimer.base = SystemClock.elapsedRealtime() -
+                        intent?.getLongExtra(WatchForeground.FOREGROUND_TIMER, 0) + 1000
+            }
+            stopWatch()
+        }
+    }
+
+    fun checkTimerFromForeService() {
+        if (pref?.getString(FOREGROUND_SERVICE_KEY, "from MainActivity") == "from Service") {
+            Log.d(TAG, "timerStatus: $timerStatus")
+            pref?.apply {
+                edit()?.putString(FOREGROUND_SERVICE_KEY, "from MainActivity")?.commit()
+
+                val isTimerStop = getBoolean(TIMER_STATUS_KEY, false)
+                timerStatus = if (isTimerStop) STOP_WATCH_PAUSE else STOP_WATCH_START
+
+                if (timerStatus == STOP_WATCH_START) {
+                    savedTime = getLong(EXERCISE_TIME_KEY, 0)
+                } else if (timerStatus == STOP_WATCH_PAUSE) {
+                    binding.textTimer.base = SystemClock.elapsedRealtime() -
+                            getLong(EXERCISE_TIME_KEY, 0) + 1000
+                }
+            }
+            stopWatch()
+        }
     }
 }
