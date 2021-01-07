@@ -95,6 +95,16 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     var thisMonth = 0
     var today = 0
 
+    /**
+     * Calendar 호출
+     */
+    lateinit var serviceIntent: Intent
+
+    /**
+     * Calendar 호출
+     */
+    var isMenuCall: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -202,7 +212,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         Log.d(TAG, "onResume() 호출")
         alarmTime = pref?.getString(getString(R.string.setting_alarm_time), "00:30").toString()
 
-        val serviceIntent = Intent(this, WatchForeground::class.java)
+        serviceIntent = Intent(this, WatchForeground::class.java)
         stopService(serviceIntent)
     }
 
@@ -301,6 +311,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        isMenuCall = true
         when (item.itemId) {
             R.id.menuCalendar -> {
                 myCalendarStart()
@@ -403,10 +414,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         helper?.roomRecordDao()?.insertAll(RoomRecord(strDate, exerciseTime))
 
-        if (timerStatus == STOP_WATCH_PAUSE) {
-            val serviceIntent = Intent(this, WatchForeground::class.java)
+        if (timerStatus == STOP_WATCH_PAUSE && !isMenuCall) {
+            serviceIntent = Intent(this, WatchForeground::class.java)
             serviceIntent.putExtra(EXERCISE_TIME_KEY, exerciseTime)
             startForegroundService(serviceIntent)
+            isMenuCall = false
         }
     }
 
