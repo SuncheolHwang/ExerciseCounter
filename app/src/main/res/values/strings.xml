@@ -5,9 +5,8 @@
     <string name="value">Input the value here.</string>
     <string name="Input">Set</string>
     <string name="Cancel">Cancel</string>
-    <string name="setting_alarm_time">alarm_time</string>
-    <string name="select_time">Set Time</string>
-    <string name="time">Time</string>
+    <string name="select_time">Break Time</string>
+    <string name="time">Set time</string>
     <string name="start">START</string>
     <string name="exercise_time">Exercise Time</string>
     <string name="time_to_exercise">Time to exercise!!</string>
@@ -19,4 +18,14 @@
     <string name="pause">PAUSE</string>
     <string name="watch_continue">CONTINUE</string>
     <string name="stop">STOP</string>
+    
+<!--    SwitchPreference-->
+    <string name="setting_alarm_time">alarm_time</string>
+    <string name="alarm_time">Exercise break time</string>
+    <string name="alarm_break_time_select">Choose the alarm time for a break</string>
+    <string name="alarm_set_time">Exercise break time: </string>
+
+    <string name="vibration_select_key">VIBRATION_SELECT_KEY</string>
+    <string name="vibration_title">Turn on vibration</string>
+    <string name="vibration_text">Turn on vibration when the break time is complete</string>
 </resources>

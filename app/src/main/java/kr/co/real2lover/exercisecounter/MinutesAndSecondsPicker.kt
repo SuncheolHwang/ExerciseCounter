@@ -20,6 +20,13 @@ class MinutesAndSecondsPicker(context: Context) : Dialog(context) {
         this.pickerDialogClickListener = pickerDialogClickListener
     }
 
+    constructor(context: Context, strSetTime: String, pickerDialogClickListener: PickerDialogClickListener) : this(context) {
+        this.pickerDialogClickListener = pickerDialogClickListener
+        val indexColon = strSetTime!!.indexOf(':')
+        minute = strSetTime!!.substring(0, indexColon).toInt()
+        second = strSetTime!!.substring(indexColon + 1).toInt()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding =  MinutesSecondsPickerBinding.inflate(layoutInflater)
@@ -28,9 +35,13 @@ class MinutesAndSecondsPicker(context: Context) : Dialog(context) {
 
         binding.minutePicker.apply {
             minValue = 0
-            maxValue = 60
+            maxValue = 10
             wrapSelectorWheel = true
             descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS
+            setFormatter { value ->
+                if (value.toString().length == 1) "0$value" else value.toString()
+            }
+            value = minute
         }
 
         binding.secondPicker.apply {
@@ -38,6 +49,10 @@ class MinutesAndSecondsPicker(context: Context) : Dialog(context) {
             maxValue = 59
             wrapSelectorWheel = true
             descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS
+            setFormatter { value ->
+                if (value.toString().length == 1) "0$value" else value.toString()
+            }
+            value = second
         }
 
         binding.buttonInput.setOnClickListener {

@@ -11,6 +11,7 @@ class SettingActivity : AppCompatActivity() {
     lateinit var pref: SharedPreferences
     lateinit var sharedPref: SharedPreferences
     var alarmTime = "00:30"
+    var isVibratorOn = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,13 +20,13 @@ class SettingActivity : AppCompatActivity() {
         pref = PreferenceManager.getDefaultSharedPreferences(this)
         alarmTime = pref.getString(getString(R.string.setting_alarm_time), alarmTime).toString()
 
+        isVibratorOn = pref.getBoolean(getString(R.string.vibration_select_key), false)
+
         sharedPref = application.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE) ?: return
         with(sharedPref.edit()) {
-            putString(getString(R.string.setting_alarm_time), alarmTime)
-            commit()
+            putString(getString(R.string.setting_alarm_time), alarmTime).commit()
+            putBoolean(getString(R.string.vibration_select_key), isVibratorOn)
         }
-
-        Toast.makeText(this, alarmTime, Toast.LENGTH_SHORT).show()
     }
 
     override fun onResume() {
@@ -45,6 +46,16 @@ class SettingActivity : AppCompatActivity() {
                     sharedPreferences.getString(getString(R.string.setting_alarm_time), alarmTime).toString()
                 with(sharedPref.edit()) {
                     putString(getString(R.string.setting_alarm_time), alarmTime)
+                    commit()
+                }
+/*                Toast.makeText(applicationContext,
+                        getString(R.string.alarm_set_time) + "$alarmTime",
+                        Toast.LENGTH_SHORT).show()*/
+            } else if (key == getString(R.string.vibration_select_key)) {
+                isVibratorOn =
+                        sharedPreferences.getBoolean(getString(R.string.vibration_select_key), false)
+                with(sharedPref.edit()) {
+                    putBoolean(getString(R.string.vibration_select_key), isVibratorOn)
                     commit()
                 }
             }

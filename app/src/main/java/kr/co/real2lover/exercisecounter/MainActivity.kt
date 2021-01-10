@@ -272,8 +272,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     fun timeIsUp(time: String) {
         if (time == alarmTime) {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-
-//                vibrator?.vibrate(VibrationEffect.createWaveform(timings, amplitudes, 0))
+                val isVibratorOn = pref?.getBoolean(getString(R.string.vibration_select_key), false)
+                if (isVibratorOn == true) {
+                    vibrator?.vibrate(VibrationEffect.createWaveform(timings, amplitudes, 0))
+                }
                 binding.textExTime.visibility = View.VISIBLE
             }
         }
