@@ -32,8 +32,12 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".MyCalendar" />
-        <activity android:name=".SettingActivity" />
+        <activity android:name=".MyCalendar"
+            android:parentActivityName=".MainActivity" />
+
+        <activity android:name=".SettingActivity"
+            android:parentActivityName=".MainActivity" />
+
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop">
@@ -43,6 +47,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
 
+    </application>
 </manifest>

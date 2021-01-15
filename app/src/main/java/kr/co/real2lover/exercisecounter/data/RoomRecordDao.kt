@@ -11,11 +11,11 @@ interface RoomRecordDao {
     @Query("SELECT * FROM orm_record")
     fun getAll(): List<RoomRecord>
 
-    @Query("SELECT * FROM orm_record WHERE orm_record.`id` IN (:recordIds)")
-    fun loadAllByIds(recordIds: IntArray): List<RoomRecord>
+    @Query("SELECT * FROM orm_record WHERE id IN (:recordIds)")
+    fun loadAllByIds(recordIds: List<Int>): List<RoomRecord>
 
-    @Query("SELECT * FROM orm_record WHERE orm_record.`date` IN (:recordDates)")
-    fun loadAllByDate(recordDates: Array<String>): List<RoomRecord>
+    @Query("SELECT * FROM orm_record WHERE date IN (:recordDates)")
+    fun loadAllByDate(recordDates: List<String>): List<RoomRecord>
 
     @Insert(onConflict = REPLACE)
     fun insertAll(vararg record: RoomRecord)

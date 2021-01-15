@@ -1,12 +1,14 @@
 package kr.co.real2lover.exercisecounter
 
 import android.app.Activity
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.style.ForegroundColorSpan
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.room.Room
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.DayViewDecorator
@@ -29,12 +31,24 @@ class MyCalendar : AppCompatActivity() {
      */
     var helper: RoomHelper? = null
 
+    /**
+     * 운동 저장 시간, 날짜
+     */
+    var mToday = "00:00:00"
+    var exerciseTime = 0L
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = MyCalendarBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+
+        //ActionBar Setting
+        supportActionBar?.apply {
+            title = getString(R.string.my_calendar)
+            setDisplayHomeAsUpEnabled(true)
+        }
 
         helper = Room.databaseBuilder(this, RoomHelper::class.java, "room_record")
                 .allowMainThreadQueries()
@@ -60,8 +74,23 @@ class MyCalendar : AppCompatActivity() {
             widget.addDecorator(MinMaxDecorator())
         }
 
-        val exerciseTime = intent.getLongExtra("ExerciseTime", 0)
+        mToday = intent.getStringExtra("Today").toString()
+        exerciseTime = intent.getLongExtra("ExerciseTime", 0)
         binding.textDay.text = getString(R.string.exercise_time) + " -> " + convertLongToTime(exerciseTime)
+
+        setResult(RESULT_OK, Intent())
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(MainActivity.TAG, "Calendar onPause() 호출")
+
+    }
+    override fun onStop() {
+        super.onStop()
+        Log.d(MainActivity.TAG, "Calendar onStop() 호출")
+
+        helper?.roomRecordDao()?.insertAll(RoomRecord(mToday, exerciseTime))
     }
 
     fun convertLongToTime(time: Long): String {
@@ -78,7 +107,7 @@ class MyCalendar : AppCompatActivity() {
             val lastLocColon : Int? = record.date?.indexOf(':', locColon!!+1)
 
             val year = record.date?.substring(0..locColon!!.minus(1))?.toInt()
-            Log.d(MainActivity.TAG, "record: ${record.date.toString()}")
+//            Log.d(MainActivity.TAG, "record: ${record.date.toString()}")
             val month = record.date?.substring(locColon!!.plus(1)..lastLocColon!!.minus(1))?.toInt()
             val day = record.date?.substring(lastLocColon!!.plus(1))?.toInt()
 

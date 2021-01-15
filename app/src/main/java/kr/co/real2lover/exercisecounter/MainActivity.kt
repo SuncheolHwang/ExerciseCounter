@@ -15,7 +15,6 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.room.Room
-import com.prolificinteractive.materialcalendarview.CalendarDay
 import kotlinx.coroutines.*
 import kr.co.real2lover.exercisecounter.data.RoomHelper
 import kr.co.real2lover.exercisecounter.data.RoomRecord
@@ -28,8 +27,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     private lateinit var binding: ActivityMainBinding
 
+    var strToday = "00:00:00"
     var savedTime: Long = 0L
-    var savedDate: String = ""
 
     /**
      * Stop Watch 시간 저장 변수
@@ -103,6 +102,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Calendar 호출
      */
+    var isCalendarRecall = false
     var isMenuCall: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -117,6 +117,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         helper = Room.databaseBuilder(this, RoomHelper::class.java, "room_record")
             .allowMainThreadQueries()
             .build()
+
         thisYear = mCalendar.get(Calendar.YEAR)
         thisMonth = mCalendar.get(Calendar.MONTH)
         today = mCalendar.get(Calendar.DAY_OF_MONTH)
@@ -129,10 +130,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         //설정 fragment 의 Data 읽기
         pref = application?.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
 
-        //같은 날짜에서는 운동시간 저장
-        savedDate = pref?.getString(DATE_KEY, "00:00:00").toString()
-        val strDate = "${thisYear}:${thisMonth}:${today}"
-        savedTime = if (savedDate == strDate) pref?.getLong(EXERCISE_TIME_KEY, 0) ?: 0 else 0
+        //같은 날짜에서는 운동시간 저장, 저장된 운동시간 호출
+        strToday = "${thisYear}:${thisMonth}:${today}"
+        savedTime = loadSavedTimeOfDate(strToday)
 
         binding.apply {
             textTimer.setOnChronometerTickListener {
@@ -157,10 +157,17 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 buttonTimer.text = "START"
             }
 
+            textCounter.setOnClickListener {
+                breakTimeBtnReset()
+                counter++
+                textCounter.text = counter.toString()
+
+                breakTimeCounter(2)
+                vibrator?.cancel()
+            }
+
             buttonPlus.setOnClickListener {
                 breakTimeBtnReset()
-                layoutBreakTime.visibility = View.GONE
-                textExTime.visibility = View.GONE
                 counter++
                 textCounter.text = counter.toString()
 
@@ -170,8 +177,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
             buttonMinus.setOnClickListener {
                 breakTimeBtnReset()
-                layoutBreakTime.visibility = View.GONE
-                textExTime.visibility = View.GONE
                 counter--
                 textCounter.text = counter.toString()
 
@@ -210,6 +215,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     override fun onResume() {
         super.onResume()
         Log.d(TAG, "onResume() 호출")
+        isMenuCall = false
+
         alarmTime = pref?.getString(getString(R.string.setting_alarm_time), "00:30").toString()
 
         serviceIntent = Intent(this, WatchForeground::class.java)
@@ -303,8 +310,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     fun breakTimeBtnReset() {
         breakTimerStatus = STOP_WATCH_PAUSE
-        binding.buttonBtStop.text = "PAUSE"
-        binding.textBreakTime.stop()
+        binding.apply {
+            buttonBtStop.text = "PAUSE"
+            textBreakTime.stop()
+            layoutBreakTime.visibility = View.GONE
+            textExTime.visibility = View.GONE
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -320,10 +331,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }
 
             R.id.menuReset -> {
+                isMenuCall = false
                 vibrator?.cancel()
                 counter = 0
                 binding.textCounter.text = counter.toString()
-                binding.layoutBreakTime.visibility = View.GONE
+                breakTimeBtnReset()
                 job.cancel()
             }
 
@@ -332,6 +344,16 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (timerStatus == STOP_WATCH_PAUSE && isMenuCall) {
+            launch {
+                delay(500)
+                stopWatch()
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -364,12 +386,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        when (resultCode) {
-            Activity.RESULT_OK -> {
-                if (requestCode == SHOW_PREFERENCE) {
 
-                    val alarmTime = pref?.getString("alarm_time", "00:30")
-                    Toast.makeText(this, alarmTime, Toast.LENGTH_SHORT).show()
+        if (resultCode == RESULT_OK) {
+            when (requestCode) {
+                SHOW_PREFERENCE -> {
+                }
+                SHOW_MY_CALENDAR -> {
+                    savedTime = loadSavedTimeOfDate(strToday)
+                    isCalendarRecall = true
                 }
             }
         }
@@ -382,10 +406,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             (timerStatus == STOP_WATCH_PAUSE) -> SystemClock.elapsedRealtime() - binding.textTimer.base
             else -> -timeWhenStopped
         }
-        val strDate = "${thisYear}:${thisMonth}:${today}"
-        helper?.roomRecordDao()?.insertAll(RoomRecord(strDate, exerciseTime))
 
-        intent.putExtra("ExerciseTime", exerciseTime)
+        helper?.roomRecordDao()?.insertAll(RoomRecord(strToday, exerciseTime))
+
+        intent.apply {
+            putExtra("Today", strToday)
+            putExtra("ExerciseTime", exerciseTime)
+        }
         startActivityForResult(intent, SHOW_MY_CALENDAR)
     }
 
@@ -402,19 +429,19 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         Log.d(TAG, "onStop() 호출")
 
         val exerciseTime = when {
-            (timerStatus == STOP_WATCH_START) -> 0
+            (timerStatus == STOP_WATCH_START) -> savedTime
             (timerStatus == STOP_WATCH_PAUSE) -> SystemClock.elapsedRealtime() - binding.textTimer.base
             else -> -timeWhenStopped
         }
-        val strDate = "${thisYear}:${thisMonth}:${today}"
 
         pref?.edit()?.run {
             putLong(EXERCISE_TIME_KEY, exerciseTime).commit()
-            putString(DATE_KEY, strDate).commit()
+            putString(DATE_KEY, strToday).commit()
             putString(FOREGROUND_SERVICE_KEY, "from MainActivity")?.commit()
         }
 
-        helper?.roomRecordDao()?.insertAll(RoomRecord(strDate, exerciseTime))
+        Log.d(TAG, "strToday: $strToday, exerciseTime: $exerciseTime")
+        helper?.roomRecordDao()?.insertAll(RoomRecord(strToday, exerciseTime))
 
         if (timerStatus == STOP_WATCH_PAUSE && !isMenuCall) {
             serviceIntent = Intent(this, WatchForeground::class.java)
@@ -427,8 +454,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
-        val isTimerStop = intent?.getBooleanExtra(WatchForeground.IS_TIMER_STOP, false)
+        Log.d(TAG,"onNewIntent() 호출")
+        if (isCalendarRecall || isMenuCall) {
+            isCalendarRecall = false
+            isMenuCall = false
+            return
+        }
 
+        val isTimerStop = intent?.getBooleanExtra(WatchForeground.IS_TIMER_STOP, false)
         if (isTimerStop != null) {
             timerStatus = if (isTimerStop) STOP_WATCH_PAUSE else STOP_WATCH_START
 
@@ -460,5 +493,27 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }
             stopWatch()
         }
+    }
+
+    fun loadSavedTimeOfDate(strDate: String): Long {
+        val listSavedRoomRecord = helper?.roomRecordDao()?.loadAllByDate(listOf(strDate))
+
+        //저장된 Data 가 없으면 return
+        if (listSavedRoomRecord?.size == 0) {
+            Log.d(TAG, "저장 Data: 0")
+            return 0
+        }
+
+        val lastDb = listSavedRoomRecord?.get(listSavedRoomRecord?.size - 1)
+
+        //저장된 Data 삭제
+        if (listSavedRoomRecord != null) {
+            for (db in listSavedRoomRecord) {
+                helper?.roomRecordDao()?.delete(db)
+            }
+        }
+
+        //마지막 저장시간 return
+        return lastDb?.time!!
     }
 }

@@ -66,22 +66,6 @@
                 android:maxLines="1"
                 android:text="@string/start" />
 
-<!--            <info.hoang8f.widget.FButton
-                android:id="@+id/buttonTimer"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="2dp"
-                android:layout_weight="1"
-                android:autoSizeMinTextSize="6sp"
-                android:autoSizeTextType="uniform"
-                android:maxLines="1"
-                android:text="@string/start"
-                fbutton:cornerRadius="5dp"
-                fbutton:fButtonColor="@color/fbutton_color_concrete"
-                fbutton:shadowColor="@color/fbutton_color_asbestos"
-                fbutton:shadowEnabled="true"
-                fbutton:shadowHeight="5dp" />-->
-
             <Button
                 android:id="@+id/buttonReset"
                 android:layout_width="0dp"
@@ -213,7 +197,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
             android:layout_marginEnd="40dp"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="40dp"
             android:text="-"
             android:textSize="36sp"
             android:textStyle="bold"
@@ -222,25 +206,30 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/buttonPlus"
             fbutton:cornerRadius="5dp"
-            fbutton:fButtonColor="@color/fbutton_color_concrete"
-            fbutton:shadowColor="@color/fbutton_color_asbestos"
+            fbutton:fButtonColor="@color/fbutton_color_belize_hole"
+            fbutton:shadowColor="@color/fbutton_color_peter_river"
             fbutton:shadowEnabled="true"
             fbutton:shadowHeight="5dp" />
 
-        <Button
+        <info.hoang8f.widget.FButton
             android:id="@+id/buttonPlus"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="40dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="20dp"
+            android:layout_marginEnd="40dp"
+            android:layout_marginBottom="40dp"
             android:text="+"
             android:textSize="36sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/buttonMinus"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            fbutton:cornerRadius="5dp"
+            fbutton:fButtonColor="@color/fbutton_color_belize_hole"
+            fbutton:shadowColor="@color/fbutton_color_peter_river"
+            fbutton:shadowEnabled="true"
+            fbutton:shadowHeight="5dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

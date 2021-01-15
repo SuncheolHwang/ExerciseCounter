@@ -1,10 +1,10 @@
 package kr.co.real2lover.exercisecounter
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Toast
 import androidx.preference.PreferenceManager
 
 class SettingActivity : AppCompatActivity() {
@@ -17,6 +17,12 @@ class SettingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setting)
 
+        //ActionBar Setting
+        supportActionBar?.apply {
+            title = getString(R.string.my_setting)
+            setDisplayHomeAsUpEnabled(true)
+        }
+
         pref = PreferenceManager.getDefaultSharedPreferences(this)
         alarmTime = pref.getString(getString(R.string.setting_alarm_time), alarmTime).toString()
 
@@ -27,6 +33,8 @@ class SettingActivity : AppCompatActivity() {
             putString(getString(R.string.setting_alarm_time), alarmTime).commit()
             putBoolean(getString(R.string.vibration_select_key), isVibratorOn)
         }
+
+        setResult(RESULT_OK, Intent())
     }
 
     override fun onResume() {

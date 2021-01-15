@@ -69,8 +69,8 @@ dependencies {
     // optional - Test helpers
     testImplementation "androidx.room:room-testing:$room_version"
 
+    // Button
     implementation 'com.github.jd-alexander:android-flat-button:v1.1'
-//    implementation 'info.hoang8f:fbutton:1.0.5'
 }
 
 allprojects {

@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Exercise Counter</string>
+    <string name="my_calendar">Exercise Calendar</string>
+    <string name="my_setting">Setting</string>
     <string name="preference_file_key">kr.co.real2lover.exercisecounter.PREFERENCE_FILE_KEY</string>
     <string name="counter_edit">Please Enter the value</string>
     <string name="value">Input the value here.</string>
