@@ -10,8 +10,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
+import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.room.Room
@@ -51,8 +51,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         private const val SHOW_PREFERENCE = 101
         private const val SHOW_MY_CALENDAR = 102
 
-        val PENDING_INTENT_FALG = 201
-
         /*
          * for Bundle Key
          */
@@ -62,12 +60,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         const val TIMER_STATUS_KEY = "TIMER_STATUS_KEY"
 
         var pref: SharedPreferences? = null
-    }
 
-    /**
-     * Counter 변수
-     */
-    private var counter = 0
+        lateinit var mainActivity: Activity
+
+        /**
+         * Counter 변수
+         */
+        var counter = 0
+    }
 
     /**
      * For Coroutine
@@ -114,6 +114,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val view = binding.root
         setContentView(view)
 
+        mainActivity = this
+
         helper = Room.databaseBuilder(this, RoomHelper::class.java, "room_record")
             .allowMainThreadQueries()
             .build()
@@ -143,6 +145,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             textTimer.text = convertLongToTime(savedTime)
 
             buttonTimer.setOnClickListener {
+                if (timerStatus == STOP_WATCH_PAUSE) {
+                    launch {
+                        val animL = AnimationUtils.loadAnimation(applicationContext, R.anim.move_l)
+                        it.startAnimation(animL)
+                    }
+                    val animR = AnimationUtils.loadAnimation(applicationContext, R.anim.move_r)
+                    buttonReset.startAnimation(animR)
+                }
                 stopWatch()
             }
 
@@ -407,7 +417,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             else -> -timeWhenStopped
         }
 
-        helper?.roomRecordDao()?.insertAll(RoomRecord(strToday, exerciseTime))
+        helper?.roomRecordDao()?.insertAll(RoomRecord(strToday, exerciseTime, counter))
 
         intent.apply {
             putExtra("Today", strToday)
@@ -441,7 +451,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
 
         Log.d(TAG, "strToday: $strToday, exerciseTime: $exerciseTime")
-        helper?.roomRecordDao()?.insertAll(RoomRecord(strToday, exerciseTime))
+        helper?.roomRecordDao()?.insertAll(RoomRecord(strToday, exerciseTime, counter))
 
         if (timerStatus == STOP_WATCH_PAUSE && !isMenuCall) {
             serviceIntent = Intent(this, WatchForeground::class.java)
@@ -466,7 +476,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             timerStatus = if (isTimerStop) STOP_WATCH_PAUSE else STOP_WATCH_START
 
             if (timerStatus == STOP_WATCH_START) {
-                savedTime = intent?.getLongExtra(WatchForeground.FOREGROUND_TIMER, 0)
+//                savedTime = intent?.getLongExtra(WatchForeground.FOREGROUND_TIMER, 0)
+                savedTime = pref?.getLong(EXERCISE_TIME_KEY, 0)!! - 1000
             } else if (timerStatus == STOP_WATCH_PAUSE) {
                 binding.textTimer.base = SystemClock.elapsedRealtime() -
                         intent?.getLongExtra(WatchForeground.FOREGROUND_TIMER, 0) + 1000
@@ -500,7 +511,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         //저장된 Data 가 없으면 return
         if (listSavedRoomRecord?.size == 0) {
-            Log.d(TAG, "저장 Data: 0")
             return 0
         }
 
@@ -514,6 +524,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
 
         //마지막 저장시간 return
+        counter = lastDb?.counter ?: 0
+        binding.textCounter.text = counter.toString()
         return lastDb?.time!!
     }
 }

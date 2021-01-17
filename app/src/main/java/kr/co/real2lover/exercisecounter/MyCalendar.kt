@@ -90,7 +90,7 @@ class MyCalendar : AppCompatActivity() {
         super.onStop()
         Log.d(MainActivity.TAG, "Calendar onStop() 호출")
 
-        helper?.roomRecordDao()?.insertAll(RoomRecord(mToday, exerciseTime))
+        helper?.roomRecordDao()?.insertAll(RoomRecord(mToday, exerciseTime, MainActivity.counter))
     }
 
     fun convertLongToTime(time: Long): String {

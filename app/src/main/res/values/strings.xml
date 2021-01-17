@@ -22,6 +22,14 @@
     <string name="stop">STOP</string>
     
 <!--    SwitchPreference-->
+    <string name="explanation">Explanation</string>
+    <string name="explanation_content">
+        When the counter changes, the break time starts.
+    </string>
+
+    <string name="long_click_explanation">Long Click Explanation</string>
+    <string name="long_click_explanation_content">Press Counter long to change the value.</string>
+
     <string name="setting_alarm_time">alarm_time</string>
     <string name="alarm_time">Exercise break time</string>
     <string name="alarm_break_time_select">Choose the alarm time for a break</string>

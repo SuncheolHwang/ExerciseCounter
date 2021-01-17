@@ -17,8 +17,18 @@ class RoomRecord {
     @ColumnInfo
     var time: Long = 0
 
+    @ColumnInfo
+    var counter: Int = 0
+
+    constructor(date: String, time: Long, counter: Int) {
+        this.date = date
+        this.time = time
+        this.counter = counter
+    }
+/*
     constructor(date: String, time: Long) {
         this.date = date
         this.time = time
-    }
+        this.counter = 0
+    }*/
 }

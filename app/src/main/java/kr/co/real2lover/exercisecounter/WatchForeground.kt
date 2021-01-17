@@ -75,13 +75,11 @@ class WatchForeground : Service(), CoroutineScope {
             launch {
                 while (true) {
                     if (!timerStop) {
-                        Log.d(MainActivity.TAG, "timer: $timer")
                         strTimer = timer?.let { watchTimer.convertLongToTime(it) }
                         builder.setContentText(strTimer)
                         notify(ONGOING_NOTIFICATION_ID, builder.build())
                         timer = timer?.plus(1000L)
                     } else {
-                        Log.d(MainActivity.TAG, "timer: $timer")
                         pauseBuilder.setContentText(strTimer)
                         notify(ONGOING_NOTIFICATION_ID, pauseBuilder.build())
                     }
@@ -89,6 +87,7 @@ class WatchForeground : Service(), CoroutineScope {
 
                     //MainActivity 로 data 전달
                     MainActivity.pref?.edit()?.apply {
+                        Log.d(MainActivity.TAG, "timer: $timer")
                         putBoolean(MainActivity.TIMER_STATUS_KEY, timerStop)
                         putLong(MainActivity.EXERCISE_TIME_KEY, timer!!)?.commit()
                         putString(MainActivity.FOREGROUND_SERVICE_KEY, "from Service")?.commit()

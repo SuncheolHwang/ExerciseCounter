@@ -1,18 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <Preference
-        android:defaultValue="false"
-        android:key="alarm_time"
-        android:summary="@string/alarm_break_time_select"
-        android:title="@string/alarm_time"
-        android:icon="@drawable/ic_alarm"/>
+    <PreferenceCategory
+        android:title="@string/explanation"
+        android:icon="@drawable/ic_explanation">
+        <Preference
+            android:summary="@string/explanation_content" />
+        <Preference
+            android:summary="@string/long_click_explanation_content" />
 
-    <SwitchPreference
-        android:key="alarm_type"
-        android:defaultValue="false"
-        android:title="@string/vibration_title"
-        android:summary="@string/vibration_text"
-        android:icon="@drawable/ic_vibrator"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Setting"
+        android:icon="@drawable/menu_setting">
+
+        <Preference
+            android:defaultValue="false"
+            android:key="alarm_time"
+            android:summary="@string/alarm_break_time_select"
+            android:title="@string/alarm_time"
+            android:icon="@drawable/ic_alarm"/>
+
+        <SwitchPreference
+            android:key="alarm_type"
+            android:defaultValue="false"
+            android:title="@string/vibration_title"
+            android:summary="@string/vibration_text"
+            android:icon="@drawable/ic_vibrator"/>
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

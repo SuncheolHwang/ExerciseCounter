@@ -38,7 +38,10 @@ class MyWatchStopReceiver : BroadcastReceiver() {
         val mCalendar = Calendar.getInstance()
         val strToday = "${mCalendar.get(Calendar.YEAR)}:${mCalendar.get(Calendar.MONTH)}:${mCalendar.get(Calendar.DAY_OF_MONTH)}"
 
-        helper?.roomRecordDao()?.insertAll(RoomRecord(strToday, exerciseTime!!))
+        helper?.roomRecordDao()?.insertAll(RoomRecord(strToday, exerciseTime!!, MainActivity.counter))
+
+        val mainActivity: MainActivity = MainActivity.mainActivity as MainActivity
+        mainActivity.finish()
 
         exitProcess(0)
     }
