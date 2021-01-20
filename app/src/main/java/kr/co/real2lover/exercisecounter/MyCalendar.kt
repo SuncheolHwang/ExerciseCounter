@@ -81,14 +81,8 @@ class MyCalendar : AppCompatActivity() {
         setResult(RESULT_OK, Intent())
     }
 
-    override fun onPause() {
-        super.onPause()
-        Log.d(MainActivity.TAG, "Calendar onPause() 호출")
-
-    }
     override fun onStop() {
         super.onStop()
-        Log.d(MainActivity.TAG, "Calendar onStop() 호출")
 
         helper?.roomRecordDao()?.insertAll(RoomRecord(mToday, exerciseTime, MainActivity.counter))
     }
@@ -107,7 +101,6 @@ class MyCalendar : AppCompatActivity() {
             val lastLocColon : Int? = record.date?.indexOf(':', locColon!!+1)
 
             val year = record.date?.substring(0..locColon!!.minus(1))?.toInt()
-//            Log.d(MainActivity.TAG, "record: ${record.date.toString()}")
             val month = record.date?.substring(locColon!!.plus(1)..lastLocColon!!.minus(1))?.toInt()
             val day = record.date?.substring(lastLocColon!!.plus(1))?.toInt()
 

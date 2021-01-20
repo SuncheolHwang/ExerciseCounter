@@ -87,7 +87,6 @@ class WatchForeground : Service(), CoroutineScope {
 
                     //MainActivity 로 data 전달
                     MainActivity.pref?.edit()?.apply {
-                        Log.d(MainActivity.TAG, "timer: $timer")
                         putBoolean(MainActivity.TIMER_STATUS_KEY, timerStop)
                         putLong(MainActivity.EXERCISE_TIME_KEY, timer!!)?.commit()
                         putString(MainActivity.FOREGROUND_SERVICE_KEY, "from Service")?.commit()
@@ -100,7 +99,6 @@ class WatchForeground : Service(), CoroutineScope {
     }
 
     override fun onDestroy() {
-        Log.d(MainActivity.TAG, "service onDestroy() 호출")
         serviceJob.cancel()
         super.onDestroy()
     }

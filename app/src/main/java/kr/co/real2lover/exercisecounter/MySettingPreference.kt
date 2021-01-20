@@ -19,7 +19,6 @@ class MySettingPreference : PreferenceFragmentCompat() {
         strSetTime = alarmTimePref.sharedPreferences.getString(getString(R.string.setting_alarm_time), "00:00").toString()
 
         alarmTimePref.setOnPreferenceClickListener {
-            Log.d("MySettingPreference", "setOnPreferenceClickListener() 호출")
             timePickerOpen()
             true
         }

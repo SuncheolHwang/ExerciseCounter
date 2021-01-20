@@ -108,8 +108,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Log.d(TAG, "onCreate() 호출")
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
@@ -164,7 +162,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 params.weight = 2F
                 buttonReset.visibility = View.GONE
                 textExTime.visibility = View.GONE
-                buttonTimer.text = "START"
+                buttonTimer.text = getString(R.string.start)
             }
 
             textCounter.setOnClickListener {
@@ -224,7 +222,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     override fun onResume() {
         super.onResume()
-        Log.d(TAG, "onResume() 호출")
+
         isMenuCall = false
 
         alarmTime = pref?.getString(getString(R.string.setting_alarm_time), "00:30").toString()
@@ -240,7 +238,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     textTimer.base = SystemClock.elapsedRealtime() - savedTime
                     textTimer.start()
                     timerStatus = STOP_WATCH_PAUSE
-                    buttonTimer.text = "PAUSE"
+                    buttonTimer.text = getString(R.string.pause)
                 }
                 STOP_WATCH_PAUSE -> {
                     timeWhenStopped = textTimer.base - SystemClock.elapsedRealtime()
@@ -248,7 +246,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     textTimer.stop()
                     timerStatus = STOP_WATCH_CONTINUE
                     params.weight = 3F
-                    buttonTimer.text = "CONTINUE"
+                    buttonTimer.text = getString(R.string.watch_continue)
                     buttonReset.visibility = View.VISIBLE
                 }
                 STOP_WATCH_CONTINUE -> {
@@ -256,7 +254,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     textTimer.start()
                     timerStatus = STOP_WATCH_PAUSE
                     params.weight = 2F
-                    buttonTimer.text = "PAUSE"
+                    buttonTimer.text = getString(R.string.pause)
                     buttonReset.visibility = View.GONE
                 }
             }
@@ -305,14 +303,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     breakTimeWhenStopped = textBreakTime.base - SystemClock.elapsedRealtime()
                     textBreakTime.stop()
                     breakTimerStatus = STOP_WATCH_CONTINUE
-                    buttonBtStop.text = "CONTINUE"
+                    buttonBtStop.text = getString(R.string.watch_continue)
                     vibrator?.cancel()
                 }
                 STOP_WATCH_CONTINUE -> {
                     textBreakTime.base = SystemClock.elapsedRealtime() + breakTimeWhenStopped
                     textBreakTime.start()
                     breakTimerStatus = STOP_WATCH_PAUSE
-                    buttonBtStop.text = "PAUSE"
+                    buttonBtStop.text = getString(R.string.pause)
                 }
             }
         }
@@ -321,7 +319,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     fun breakTimeBtnReset() {
         breakTimerStatus = STOP_WATCH_PAUSE
         binding.apply {
-            buttonBtStop.text = "PAUSE"
+            buttonBtStop.text = getString(R.string.pause)
             textBreakTime.stop()
             layoutBreakTime.visibility = View.GONE
             textExTime.visibility = View.GONE
@@ -436,7 +434,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStop() {
         super.onStop()
-        Log.d(TAG, "onStop() 호출")
 
         val exerciseTime = when {
             (timerStatus == STOP_WATCH_START) -> savedTime
@@ -450,7 +447,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             putString(FOREGROUND_SERVICE_KEY, "from MainActivity")?.commit()
         }
 
-        Log.d(TAG, "strToday: $strToday, exerciseTime: $exerciseTime")
         helper?.roomRecordDao()?.insertAll(RoomRecord(strToday, exerciseTime, counter))
 
         if (timerStatus == STOP_WATCH_PAUSE && !isMenuCall) {
@@ -464,7 +460,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
-        Log.d(TAG,"onNewIntent() 호출")
         if (isCalendarRecall || isMenuCall) {
             isCalendarRecall = false
             isMenuCall = false
@@ -488,7 +483,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     fun checkTimerFromForeService() {
         if (pref?.getString(FOREGROUND_SERVICE_KEY, "from MainActivity") == "from Service") {
-            Log.d(TAG, "timerStatus: $timerStatus")
             pref?.apply {
                 edit()?.putString(FOREGROUND_SERVICE_KEY, "from MainActivity")?.commit()
 

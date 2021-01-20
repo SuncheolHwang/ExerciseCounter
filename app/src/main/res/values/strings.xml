@@ -20,7 +20,8 @@
     <string name="pause">PAUSE</string>
     <string name="watch_continue">CONTINUE</string>
     <string name="stop">STOP</string>
-    
+    <string name="text_reset">RESET</string>
+
 <!--    SwitchPreference-->
     <string name="explanation">Explanation</string>
     <string name="explanation_content">
