@@ -19,6 +19,7 @@ import kotlinx.coroutines.*
 import kr.co.real2lover.exercisecounter.data.RoomHelper
 import kr.co.real2lover.exercisecounter.data.RoomRecord
 import kr.co.real2lover.exercisecounter.databinding.ActivityMainBinding
+import java.lang.Exception
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 
@@ -373,9 +374,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val counterDialog = CounterEditDialog(this, object : CustomDialogClickListener {
             override fun onPositiveClick(value: String) {
                 breakTimeBtnReset()
-                binding.textCounter.text = value
-                counter = value.toInt()
-                breakTimeCounter(0)
+                try {
+                    binding.textCounter.text = value
+                    counter = value.toInt()
+                    breakTimeCounter(0)
+                } catch (e: Exception) {
+                    binding.textCounter.text = counter.toString()
+                }
             }
 
             override fun onNegativeClick() {
